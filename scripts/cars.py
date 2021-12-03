@@ -49,9 +49,9 @@ def process_data(data):
   summary = [
     "The {} generated the most revenue: ${}".format(
       format_car(max_revenue["car"]), max_revenue["revenue"]),
-    "The car with the most sales: {} with {} sales".format(
+    "The {} had the most sales: {}".format(
       format_car(max_sales["car"]), max_sales["total_sales"]),
-    "The year with the most sales: {} with {}".format(
+    "The most popular year was {} with {} sales.".format(
       return_max(car_years), car_years[return_max(car_years)])
   ]
 
@@ -66,15 +66,31 @@ def cars_dict_to_table(car_data):
   return table_data
 
 
+def summary_str(summary, br):
+  body = ""
+  for item in summary:
+    body += str(item) + br
+  return body
+
+
+def send_email(summary):
+  sender = "automation@example.com"
+  receiver = "{}@example.com".format(os.environ.get('USER'))
+  subject = "Sales summary for last month"
+  body = summary_str(summary, "\n")
+  message = emails.generate(sender, receiver, subject, body, "/tmp/report.pdf")
+  emails.send(message)
+
+
 def main(argv):
   """Process the JSON data and generate a full report out of it."""
   data = load_data("car_sales.json")
   summary = process_data(data)
   print(summary)
   table_data = cars_dict_to_table(data)
-  reports.generate("/tmp/report.pdf", "Car sales", "cars organized by id", table_data)
-
-  # TODO: send the PDF report as an email attachment
+  reports.generate("/tmp/report.pdf", "Sales summary for last month", summary_str(summary, "<br/>"), table_data)
+  send_email(summary)
+  print("Email sent")
 
 
 if __name__ == "__main__":
