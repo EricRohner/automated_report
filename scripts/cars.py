@@ -17,6 +17,10 @@ def format_car(car):
   return "{} {} ({})".format(
       car["car_make"], car["car_model"], car["car_year"])
 
+def return_max(years):
+  k = list(years.keys())
+  v = list(years.values())
+  return k[v.index(max(v))]
 
 def process_data(data):
   """Analyzes the data, looking for maximums.
@@ -37,12 +41,16 @@ def process_data(data):
     # Find car with max sales
     if item["total_sales"] > max_sales["total_sales"]:
       max_sales = item
-    # TODO: also handle most popular car_year
+    # Generate a dict of car years and their total count
+    car_years[item["car"]["car_year"]] = car_years.get(item["car"]["car_year"], 0) + item["total_sales"]
 
   summary = [
     "The {} generated the most revenue: ${}".format(
       format_car(max_revenue["car"]), max_revenue["revenue"]),
-    "The car with the most sales: {}".format(max_sales["total_sales"])
+    "The car with the most sales: {} with {} sales".format(
+      format_car(max_sales["car"]), max_sales["total_sales"]),
+    "The year with the most sales: {} with {}".format(
+      return_max(car_years), car_years[return_max(car_years)])
   ]
 
   return summary
